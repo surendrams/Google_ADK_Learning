@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Analysis Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const TrendingUp = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+        );
+
+        const Activity = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+        );
+
+        const DollarSign = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+        );
+
+        const AlertTriangle = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        );
+
+        const StockDashboard = () => {
+            const [sortBy, setSortBy] = useState('gain_pct');
+            const [filterRec, setFilterRec] = useState('all');
+
+            const stockData = [
+                {"symbol":"NVDA","name":"Nvidia Corp","high":1150.0,"low":1102.0,"gain_pct":7.1,"cap":"Large","buyout_trap":false,"rsi_14d":76,"strategy":"Momentum","worth_investing":"Yes","recommendation":"Buy on Dip","analyst_insights_strategy":"Overbought conditions; Focus on High-Growth Semiconductor and AI sectors."},
+                {"symbol":"TSLA","name":"Tesla Inc","high":182.5,"low":174.1,"gain_pct":3.4,"cap":"Large","buyout_trap":false,"rsi_14d":52,"strategy":"Swing","worth_investing":"Yes","recommendation":"Hold","analyst_insights_strategy":"Large-cap swing strategy with moderate technical strength."},
+                {"symbol":"ARM","name":"ARM Holdings","high":129.4,"low":118.2,"gain_pct":6.2,"cap":"Large","buyout_trap":false,"rsi_14d":71,"strategy":"Growth","worth_investing":"No","recommendation":"Wait for Pullback","analyst_insights_strategy":"Currently showing overbought conditions; risk of a short-term reversal is elevated."},
+                {"symbol":"PLTR","name":"Palantir Tech","high":23.1,"low":20.9,"gain_pct":4.8,"cap":"Large","buyout_trap":false,"rsi_14d":63,"strategy":"Momentum","worth_investing":"Yes","recommendation":"Buy","analyst_insights_strategy":"Focus on High-Growth Semiconductor and AI sectors; strong momentum."},
+                {"symbol":"DFS","name":"Discover Financial","high":124.5,"low":122.1,"gain_pct":0.3,"cap":"Mid","buyout_trap":true,"rsi_14d":49,"strategy":"Arbitrage","worth_investing":"No","recommendation":"Avoid","analyst_insights_strategy":"Buyout trap; price capped by Capital One acquisition deal spread."},
+                {"symbol":"MU","name":"Micron Tech","high":132.8,"low":125.6,"gain_pct":4.5,"cap":"Large","buyout_trap":false,"rsi_14d":68,"strategy":"Cyclical","worth_investing":"Yes","recommendation":"Buy","analyst_insights_strategy":"Focus on High-Growth Semiconductor and AI sectors."},
+                {"symbol":"AVGO","name":"Broadcom Inc","high":1435.0,"low":1395.0,"gain_pct":2.7,"cap":"Large","buyout_trap":false,"rsi_14d":65,"strategy":"Growth","worth_investing":"Yes","recommendation":"Hold","analyst_insights_strategy":"Consistent growth strategy within the large-cap sector."},
+                {"symbol":"LLY","name":"Eli Lilly & Co","high":830.5,"low":805.0,"gain_pct":2.2,"cap":"Large","buyout_trap":false,"rsi_14d":74,"strategy":"Trend","worth_investing":"Yes","recommendation":"Buy","analyst_insights_strategy":"Strong trend but entering overbought territory (RSI > 70)."},
+                {"symbol":"GME","name":"GameStop Corp","high":26.5,"low":20.1,"gain_pct":18.2,"cap":"Mid","buyout_trap":false,"rsi_14d":81,"strategy":"Speculative","worth_investing":"No","recommendation":"Sell/Avoid","analyst_insights_strategy":"Significantly overbought; speculative volatility with high risk of reversal."},
+                {"symbol":"HES","name":"Hess Corp","high":152.1,"low":149.8,"gain_pct":0.4,"cap":"Large","buyout_trap":true,"rsi_14d":51,"strategy":"Arbitrage","worth_investing":"No","recommendation":"Avoid","analyst_insights_strategy":"Buyout trap; price capped by Chevron acquisition deal spread."}
+            ];
+
+            const getRecommendationColor = (rec) => {
+                switch(rec) {
+                    case 'Strong Buy': return 'bg-green-100 text-green-800 border-green-300';
+                    case 'Buy': return 'bg-blue-100 text-blue-800 border-blue-300';
+                    case 'Buy on Dip': return 'bg-cyan-100 text-cyan-800 border-cyan-300';
+                    case 'Hold': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                    case 'Wait for Pullback': return 'bg-purple-100 text-purple-800 border-purple-300';
+                    case 'Watch': return 'bg-orange-100 text-orange-800 border-orange-300';
+                    case 'Avoid': return 'bg-red-100 text-red-800 border-red-300';
+                    case 'Sell/Avoid': return 'bg-red-200 text-red-900 border-red-400';
+                    default: return 'bg-gray-100 text-gray-800 border-gray-300';
+                }
+            };
+
+            const getRSIColor = (rsi) => {
+                if (rsi >= 70) return 'text-red-600 font-semibold';
+                if (rsi >= 50) return 'text-green-600 font-semibold';
+                return 'text-gray-600';
+            };
+
+            const sortedData = [...stockData].sort((a, b) => {
+                if (sortBy === 'gain_pct') return b.gain_pct - a.gain_pct;
+                if (sortBy === 'rsi_14d') return b.rsi_14d - a.rsi_14d;
+                if (sortBy === 'symbol') return a.symbol.localeCompare(b.symbol);
+                return 0;
+            });
+
+            const filteredData = sortedData.filter(stock => {
+                if (filterRec === 'all') return true;
+                return stock.recommendation === filterRec;
+            });
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="mb-8">
+                            <h1 className="text-4xl font-bold text-slate-800 mb-2">Stock Analysis Dashboard</h1>
+                            <p className="text-slate-600">Real-time market insights and recommendations</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Buy Signals</p>
+                                        <p className="text-2xl font-bold text-gray-800">
+                                            {stockData.filter(s => s.recommendation.includes('Buy') && !s.recommendation.includes('Avoid')).length}
+                                        </p>
+                                    </div>
+                                    <TrendingUp size={32} className="text-green-500" />
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Hold</p>
+                                        <p className="text-2xl font-bold text-gray-800">
+                                            {stockData.filter(s => s.recommendation === 'Hold').length}
+                                        </p>
+                                    </div>
+                                    <Activity size={32} className="text-yellow-500" />
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Avg Gain %</p>
+                                        <p className="text-2xl font-bold text-gray-800">
+                                            {(stockData.reduce((sum, s) => sum + s.gain_pct, 0) / stockData.length).toFixed(2)}%
+                                        </p>
+                                    </div>
+                                    <DollarSign size={32} className="text-red-500" />
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">Buyout Traps</p>
+                                        <p className="text-2xl font-bold text-gray-800">
+                                            {stockData.filter(s => s.buyout_trap).length}
+                                        </p>
+                                    </div>
+                                    <AlertTriangle size={32} className="text-orange-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow p-4 mb-6">
+                            <div className="flex flex-wrap gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                                    <select 
+                                        value={sortBy} 
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="gain_pct">Gain %</option>
+                                        <option value="rsi_14d">RSI</option>
+                                        <option value="symbol">Symbol</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Recommendation</label>
+                                    <select 
+                                        value={filterRec} 
+                                        onChange={(e) => setFilterRec(e.target.value)}
+                                        className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="all">All</option>
+                                        <option value="Buy">Buy</option>
+                                        <option value="Buy on Dip">Buy on Dip</option>
+                                        <option value="Hold">Hold</option>
+                                        <option value="Wait for Pullback">Wait for Pullback</option>
+                                        <option value="Avoid">Avoid</option>
+                                        <option value="Sell/Avoid">Sell/Avoid</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {filteredData.map((stock) => (
+                                <div key={stock.symbol} className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-gray-800">{stock.symbol}</h3>
+                                                <p className="text-sm text-gray-600">{stock.name}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getRecommendationColor(stock.recommendation)}`}>
+                                                    {stock.recommendation}
+                                                </span>
+                                                {stock.buyout_trap && (
+                                                    <div className="mt-2">
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
+                                                            <AlertTriangle size={12} className="mr-1" />
+                                                            Buyout Trap
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <p className="text-xs text-gray-500">High</p>
+                                                <p className="text-lg font-semibold text-gray-800">${stock.high}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">Low</p>
+                                                <p className="text-lg font-semibold text-gray-800">${stock.low}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">Gain</p>
+                                                <p className="text-lg font-semibold text-green-600">+{stock.gain_pct}%</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-4 mb-4">
+                                            <div>
+                                                <p className="text-xs text-gray-500">Market Cap</p>
+                                                <p className="text-sm font-semibold text-gray-800">{stock.cap}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">RSI (14d)</p>
+                                                <p className={`text-sm font-semibold ${getRSIColor(stock.rsi_14d)}`}>{stock.rsi_14d}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500">Worth It?</p>
+                                                <p className="text-sm font-semibold text-gray-800">{stock.worth_investing}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <p className="text-xs text-gray-500 mb-1">Strategy</p>
+                                            <p className="text-sm font-medium text-blue-700 bg-blue-50 px-3 py-2 rounded-md">
+                                                {stock.strategy}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-1">Analyst Insights</p>
+                                            <p className="text-sm text-gray-700 leading-relaxed">
+                                                {stock.analyst_insights_strategy}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<StockDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>

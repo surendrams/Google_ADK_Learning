@@ -1,0 +1,31 @@
+"""Research coordinator agent for FOMC Research Agent."""
+
+from google.adk.agents import Agent
+
+from ..agent import GOOGLE_MODEL_NAME
+from ..shared_libraries.callbacks import rate_limit_callback
+from ..tools.compare_statements import compare_statements_tool
+from ..tools.compute_rate_move_probability import compute_rate_move_probability_tool
+from ..tools.fetch_transcript import fetch_transcript_tool
+from ..tools.store_state import store_state_tool
+from . import research_agent_prompt
+from .summarize_meeting_agent import SummarizeMeetingAgent
+
+ResearchAgent = Agent(
+    model=GOOGLE_MODEL_NAME,
+    name="research_agent",
+    description=(
+        "Research the latest FOMC meeting to provide information for analysis."
+    ),
+    instruction=research_agent_prompt.PROMPT,
+    sub_agents=[
+        SummarizeMeetingAgent,
+    ],
+    tools=[
+        store_state_tool,
+        compare_statements_tool,
+        fetch_transcript_tool,
+        compute_rate_move_probability_tool,
+    ],
+    before_model_callback=rate_limit_callback,
+)

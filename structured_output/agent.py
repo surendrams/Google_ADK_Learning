@@ -1,6 +1,7 @@
 from google.adk.agents.llm_agent import Agent
 from pydantic import BaseModel, Field
 
+
 class EmailContent(BaseModel):
     subject: str = Field(
         description="The subject line of the email. Should be concise and descriptive."
@@ -12,8 +13,8 @@ class EmailContent(BaseModel):
 
 # Create LLM Agent
 root_agent = Agent(
-    name='structured_output',
-    model='gemini-2.5-flash-lite',
+    name="structured_output",
+    model="gemini-2.5-flash-lite",
     instruction="""
         You are an Email Generation Assistant.
         Your task is to generate a professional email based on the user's request.

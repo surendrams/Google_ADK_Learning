@@ -1,0 +1,15 @@
+"""Academic_Research: Research advice, related literature finding, research area proposals, web knowledge access."""
+
+import os
+
+import google.auth
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
+
+_, project_id = google.auth.default()
+os.environ.setdefault("GOOGLE_CLOUD_PROJECT", project_id)
+os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
+os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
+
+from . import agent

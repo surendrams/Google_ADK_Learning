@@ -1,6 +1,6 @@
 import datetime
 from zoneinfo import ZoneInfo
-from google.adk.agents import Agent 
+from google.adk.agents import Agent
 from google.genai import types
 
 
@@ -43,29 +43,26 @@ def get_current_time(city: str) -> dict:
     else:
         return {
             "status": "error",
-            "error_message": (
-                f"Sorry, I don't have timezone information for {city}."
-            ),
+            "error_message": (f"Sorry, I don't have timezone information for {city}."),
         }
 
     tz = ZoneInfo(tz_identifier)
     now = datetime.datetime.now(tz)
-    report = (
-        f'The current time in {city} is {now.strftime("%Y-%m-%d %H:%M:%S %Z%z")}'
-    )
+    report = f"The current time in {city} is {now.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"
     return {"status": "success", "report": report}
 
 
 root_agent = Agent(
     name="multi_agent",
     model="gemini-2.0-flash",
-    generate_content_config = types.GenerateContentConfig(http_options=types.HttpOptions(retry_options=types.HttpRetryOptions(initial_delay=1, attempts=2))),
-    description=(
-        "Agent to answer questions about the time and weather in a city."
+    generate_content_config=types.GenerateContentConfig(
+        http_options=types.HttpOptions(
+            retry_options=types.HttpRetryOptions(initial_delay=1, attempts=2)
+        )
     ),
+    description=("Agent to answer questions about the time and weather in a city."),
     instruction=(
         "You are a helpful agent that greets the user, Ask for the user's name and greet them by name. And also who can answer user questions about the time and weather in a city."
     ),
     tools=[get_weather, get_current_time],
 )
-
